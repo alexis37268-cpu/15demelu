@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>El libro de Melu</title>
+<style>
+@font-face{font-family:"Alegreya";src:url(fonts/alegreya-latin-400-normal.woff2) format("woff2");font-weight:400;font-style:normal}
+@font-face{font-family:"Alegreya";src:url(fonts/alegreya-latin-400-italic.woff2) format("woff2");font-weight:400;font-style:italic}
+@font-face{font-family:"Alegreya";src:url(fonts/alegreya-latin-600-normal.woff2) format("woff2");font-weight:600;font-style:normal}
+@font-face{font-family:"Caveat";src:url(fonts/caveat-latin-500-normal.woff2) format("woff2");font-weight:500}
+@font-face{font-family:"Caveat";src:url(fonts/caveat-latin-700-normal.woff2) format("woff2");font-weight:700}
+@font-face{font-family:"IM Fell English";src:url(fonts/im-fell-english-latin-400-normal.woff2) format("woff2");font-style:normal}
+@font-face{font-family:"IM Fell English";src:url(fonts/im-fell-english-latin-400-italic.woff2) format("woff2");font-style:italic}
+*{box-sizing:border-box}img{max-width:100%}[hidden]{display:none!important}body{margin:0}
+/* Libro de páginas que se pasan deslizando: tapa de tela azul noche, hojas de papel rosado cosidas con puntada */
+:root{
+  --noche:#1b1f3a; --noche2:#262b52; --papel:#f6ebe7; --tinta:#2d2340;
+  --hilo:#c94f78; --oro:#c9a24a; --suave:#7b6a80;
+  --display:"IM Fell English","Iowan Old Style",Georgia,serif;
+  --body:"Alegreya",Georgia,"Times New Roman",serif;
+  --mano:"Caveat","Segoe Print","Comic Sans MS",cursive;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--noche);color:var(--tinta);font-family:var(--body);overflow:hidden}
+.libro{height:100%;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.libro::-webkit-scrollbar{display:none}
+.pag{flex:0 0 100%;height:100%;scroll-snap-align:start;overflow-y:auto;padding-block:14px 86px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.hoja{position:relative;max-width:620px;margin:0 auto;background:var(--papel);border-radius:6px 14px 14px 6px;padding:28px 20px 34px;min-height:100%;box-shadow:inset 10px 0 18px -12px rgba(60,30,60,.35),0 10px 30px rgba(0,0,0,.35)}
+.hoja::before{content:"";position:absolute;inset:9px;border:2px dashed var(--hilo);border-radius:4px 10px 10px 4px;opacity:.45;pointer-events:none}
+.cap{font-family:var(--body);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--hilo);text-align:center}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(2rem,8vw,2.8rem);line-height:1.05;text-align:center;margin:.2em 0 .25em;text-wrap:balance}
+.intro{font-style:italic;text-align:center;color:var(--suave);max-width:34ch;margin:0 auto 22px;font-size:1.05rem;line-height:1.45}
+.fotos{columns:2;column-gap:14px}
+.foto{break-inside:avoid;margin:0 0 16px;background:#fff;padding:7px 7px 4px;box-shadow:0 2px 8px rgba(45,35,64,.18);transform:rotate(var(--r,0deg))}
+.foto img{display:block;width:100%;height:auto}
+.foto figcaption{font-family:var(--mano);font-size:1.2rem;color:var(--tinta);text-align:center;line-height:1.1;padding:5px 2px 3px}
+.una{columns:1}
+.foto.ancha{column-span:all}
+
+/* Tapa */
+.tapa{background:radial-gradient(120% 90% at 50% 20%,var(--noche2),var(--noche));color:var(--papel);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;border:none;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.tapa::before{border-color:var(--oro);opacity:.7}
+.tapa .marco{width:min(46vw,190px);aspect-ratio:3/4;border-radius:50% 50% 46% 46%;overflow:hidden;border:3px solid var(--oro);box-shadow:0 0 0 6px var(--noche),0 0 0 7px var(--oro)}
+.tapa .marco img{width:100%;height:100%;object-fit:cover}
+.tapa h1{font-family:var(--display);font-weight:400;font-size:clamp(3.6rem,18vw,5.6rem);line-height:.9;margin:6px 0 0;color:var(--papel)}
+.tapa .quince{font-family:var(--display);font-style:italic;color:var(--oro);font-size:1.5rem}
+.tapa .sub{font-style:italic;opacity:.8;max-width:28ch}
+.abrir{font-family:var(--body);font-size:1.05rem;background:var(--oro);color:var(--noche);border:0;border-radius:999px;padding:12px 26px;font-weight:600;cursor:pointer;margin-top:6px}
+.abrir:focus-visible,.nav button:focus-visible,.gato:focus-visible,.lnk:focus-visible{outline:3px solid var(--hilo);outline-offset:3px}
+
+/* Papi */
+.papa{background:#efe6e9}
+.papa .intro{color:var(--tinta)}
+
+/* Carta */
+.carta p{font-family:var(--mano);font-size:1.45rem;line-height:1.35;color:var(--tinta);margin:0 0 .7em;max-width:36ch;margin-inline:auto}
+.carta .firma{text-align:right;font-size:1.7rem;color:var(--hilo)}
+
+/* Logro */
+.logro{background:radial-gradient(120% 90% at 50% 10%,var(--noche2),var(--noche));color:var(--papel);text-align:center}
+.logro::before{border-color:var(--oro)}
+.logro h2{color:var(--papel)}
+.trofeo{margin:18px auto;border:2px solid var(--oro);border-radius:12px;padding:16px;max-width:340px;display:flex;gap:14px;align-items:center;text-align:left;background:rgba(201,162,74,.08)}
+.trofeo .ic{flex:0 0 56px;height:56px;border-radius:50%;background:var(--oro);display:grid;place-items:center;font-family:var(--display);font-size:1.6rem;color:var(--noche)}
+.trofeo b{display:block;font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--oro)}
+.trofeo span{font-family:var(--display);font-size:1.5rem}
+.bloq{opacity:.9}
+.pistas{display:flex;justify-content:center;gap:14px;margin:16px 0}
+.pistas svg{width:44px;height:44px}
+.lnk{background:none;border:0;color:var(--oro);text-decoration:underline;font:inherit;cursor:pointer;margin-top:10px}
+.logro .foto{max-width:300px;margin:18px auto 0;transform:rotate(-2deg)}
+.final p{font-size:1.15rem;line-height:1.5;max-width:32ch;margin:10px auto}
+
+/* Gatitos escondidos */
+.gato{position:absolute;width:40px;height:40px;padding:0;border:0;background:none;cursor:pointer;z-index:2}
+.gato svg{width:100%;height:100%}
+.gato.ok{animation:salto .6s ease}
+@keyframes salto{40%{transform:scale(1.4) rotate(-10deg)}}
+
+/* Navegación */
+.nav{position:fixed;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px max(14px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));background:linear-gradient(transparent,rgba(27,31,58,.92) 40%);z-index:5}
+.nav button{width:46px;height:46px;border-radius:50%;border:1.5px solid var(--oro);background:var(--noche);color:var(--oro);font-size:1.3rem;cursor:pointer}
+.nav button:disabled{opacity:.3}
+.puntos{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.puntos i{width:7px;height:7px;border-radius:50%;background:var(--papel);opacity:.3}
+.puntos i.on{opacity:1;background:var(--oro)}
+.toast{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top,0px));transform:translate(-50%,-20px);background:var(--hilo);color:#fff;font-family:var(--body);padding:10px 18px;border-radius:999px;opacity:0;transition:.3s;z-index:9;pointer-events:none;white-space:nowrap}
+.toast.ver{opacity:1;transform:translate(-50%,0)}
+canvas#chispas{position:fixed;inset:0;pointer-events:none;z-index:8}
+@media (prefers-reduced-motion:reduce){.libro{scroll-behavior:auto}.gato.ok{animation:none}}
+
+/* Coser */
+.coser{text-align:center}
+.bastidor{width:min(100%,340px);margin:4px auto 0;border-radius:50%;padding:12px;background:radial-gradient(circle,#b98a52 0 62%,#8a5f30 63% 100%);box-shadow:0 6px 18px rgba(45,35,64,.3)}
+#tela{display:block;width:100%;aspect-ratio:1;border-radius:50%;touch-action:none;cursor:crosshair}
+.progreso{font-family:var(--mano);font-size:1.4rem;color:var(--hilo);margin:12px 0 0}
+.mensaje p{font-family:var(--mano);font-size:1.45rem;line-height:1.35;max-width:32ch;margin:.5em auto;color:var(--tinta)}
+.mensaje .firma{color:var(--hilo);font-size:1.7rem}
+</style>
+
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="gatito" viewBox="0 0 64 64">
+    <path d="M14 54c-4-8-4-20 2-28l-4-14 12 8c5-2 11-2 16 0l12-8-4 14c6 8 6 20 2 28z" fill="#e9a3b8" stroke="#2d2340" stroke-width="2"/>
+    <path d="M14 54c-4-8-4-20 2-28l-4-14 12 8c5-2 11-2 16 0l12-8-4 14c6 8 6 20 2 28z" fill="none" stroke="#fff" stroke-width="1.4" stroke-dasharray="3 3" transform="translate(32 34) scale(.86) translate(-32 -34)"/>
+    <circle cx="25" cy="36" r="2.6" fill="#2d2340"/><circle cx="39" cy="36" r="2.6" fill="#2d2340"/>
+    <path d="M30 42h4l-2 2.4z" fill="#c94f78"/>
+    <path d="M18 43h8M18 46l8-1M46 43h-8M46 46l-8-1" stroke="#2d2340" stroke-width="1.2"/>
+    <rect x="44" y="18" width="7" height="7" rx="1" fill="#c9a24a" transform="rotate(20 47 21)"/>
+  </symbol>
+</svg>
+
+<main class="libro" id="libro">
+
+  <!-- Tapa -->
+  <section class="pag" aria-label="Tapa">
+    <div class="hoja tapa">
+      <div class="marco"><img src="f/35.webp" alt="Melu junto al agua" style="object-position:50% 30%"></div>
+      <h1>Melu</h1>
+      <div class="quince">quince años</div>
+      <p class="sub">Un libro sobre vos, escrito por quien más te quiere.</p>
+      <button class="abrir" id="abrir">Abrir el libro</button>
+      <p class="sub" style="font-size:.9rem;opacity:.65">Pasá las páginas deslizando hacia el costado.<br>Hay 3 gatitos de tela escondidos. Encontralos.</p>
+    </div>
+  </section>
+
+  <!-- Capítulo 1 -->
+  <section class="pag" aria-label="Capítulo 1">
+    <div class="hoja">
+      <div class="cap">Capítulo uno</div>
+      <h2>De chiquita</h2>
+      <p class="intro">Antes de los libros gordos y de la máquina de coser, ya eras así: curiosa, con estilo propio y con un sombrero más grande que vos.</p>
+      <div class="fotos">
+        <figure class="foto" style="--r:-1.5deg"><img src="f/40.webp" alt="" loading="lazy"><figcaption>La vaquera</figcaption></figure>
+        <figure class="foto" style="--r:1deg"><img src="f/43.webp" alt="" loading="lazy"><figcaption>Anteojos de estrella</figcaption></figure>
+        <figure class="foto" style="--r:1.2deg"><img src="f/20.webp" alt="" loading="lazy"><figcaption>Pantuflas de oso</figcaption></figure>
+        <figure class="foto" style="--r:-1deg"><img src="f/3.webp" alt="" loading="lazy"><figcaption>Desde el principio</figcaption></figure>
+        <figure class="foto" style="--r:-1.4deg"><img src="f/4.webp" alt="" loading="lazy"><figcaption>Toda de rosa</figcaption></figure>
+        <figure class="foto" style="--r:1.6deg"><img src="f/49.webp" alt="" loading="lazy"><figcaption>Pensando</figcaption></figure>
+        <figure class="foto" style="--r:-.8deg"><img src="f/39.webp" alt="" loading="lazy"><figcaption>Esa mirada</figcaption></figure>
+        <figure class="foto" style="--r:1deg"><img src="f/51.webp" alt="" loading="lazy"><figcaption>La conejita</figcaption></figure>
+        <figure class="foto" style="--r:-1.2deg"><img src="f/7.webp" alt="" loading="lazy"><figcaption>Oficial de guardia</figcaption></figure>
+        <figure class="foto" style="--r:1.3deg"><img src="f/32.webp" alt="" loading="lazy"><figcaption>Siempre con onda</figcaption></figure>
+        <figure class="foto" style="--r:-1deg"><img src="f/5.webp" alt="" loading="lazy"><figcaption>La siesta</figcaption></figure>
+        <figure class="foto" style="--r:1deg"><img src="f/10.webp" alt="" loading="lazy"><figcaption>Con su compañero</figcaption></figure>
+        <figure class="foto" style="--r:-1.5deg"><img src="f/15.webp" alt="" loading="lazy"><figcaption>Cualquier caja es un castillo</figcaption></figure>
+        <figure class="foto" style="--r:1.2deg"><img src="f/6.webp" alt="" loading="lazy"><figcaption>Sonrisa de noche</figcaption></figure>
+        <figure class="foto" style="--r:-1deg"><img src="f/11.webp" alt="" loading="lazy"><figcaption>La bici rosa</figcaption></figure>
+      </div>
+      <button class="gato" data-g="1" style="right:20px;bottom:22px" aria-label="Gatito escondido"><svg><use href="#gatito"/></svg></button>
+    </div>
+  </section>
+
+  <!-- Capítulo 2: papi -->
+  <section class="pag" aria-label="Capítulo 2">
+    <div class="hoja papa">
+      <div class="cap">Capítulo dos</div>
+      <h2>Con papi</h2>
+      <p class="intro">Te parecés tanto a él. Estas páginas son suyas y tuyas.</p>
+      <div class="fotos una">
+        <figure class="foto" style="--r:-.8deg"><img src="f/2.webp" alt="" loading="lazy"><figcaption>Todos juntos, y vos en el medio</figcaption></figure>
+      </div>
+      <div class="fotos">
+        <figure class="foto" style="--r:1deg"><img src="f/1.webp" alt="" loading="lazy"><figcaption>En brazos de papi</figcaption></figure>
+        <figure class="foto" style="--r:-1deg"><img src="f/18.webp" alt="" loading="lazy"><figcaption>Su nena</figcaption></figure>
+        <figure class="foto" style="--r:1.2deg"><img src="f/12.webp" alt="" loading="lazy"><figcaption>El día del desfile</figcaption></figure>
+        <figure class="foto" style="--r:-1.2deg"><img src="f/41.webp" alt="" loading="lazy"><figcaption>Jugando en el piso</figcaption></figure>
+        <figure class="foto" style="--r:.8deg"><img src="f/16.webp" alt="" loading="lazy"><figcaption>La princesa</figcaption></figure>
+        <figure class="foto" style="--r:-1deg"><img src="f/8.webp" alt="" loading="lazy"><figcaption>Selfie con papi</figcaption></figure>
+        <figure class="foto" style="--r:1deg"><img src="f/p1.webp" alt="" loading="lazy"><figcaption>Bajo los árboles</figcaption></figure>
+        <figure class="foto" style="--r:1deg"><img src="f/13.webp" alt="" loading="lazy"><figcaption>Sonrisas iguales</figcaption></figure>
+        <figure class="foto" style="--r:-.8deg"><img src="f/14.webp" alt="" loading="lazy"><figcaption>Domingo en la cama grande</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Capítulo 3 -->
+  <section class="pag" aria-label="Capítulo 3">
+    <div class="hoja">
+      <div class="cap">Capítulo tres</div>
+      <h2>La familia</h2>
+      <p class="intro">Mami, los abuelos, los hermanos. Todos hicimos lo posible para que no te faltara nada, y vos lo devolviste multiplicado.</p>
+      <div class="fotos una">
+        <figure class="foto" style="--r:-.8deg"><img src="f/ab1.webp" alt="" loading="lazy"><figcaption>Los 47 años de los abuelos</figcaption></figure>
+      </div>
+      <div class="fotos">
+        <figure class="foto" style="--r:1deg"><img src="f/m2.webp" alt="" loading="lazy"><figcaption>Abrazo de cumple</figcaption></figure>
+        <figure class="foto" style="--r:-1.2deg"><img src="f/m4.webp" alt="" loading="lazy"><figcaption>Mami y su nena</figcaption></figure>
+        <figure class="foto" style="--r:-1deg"><img src="f/42.webp" alt="" loading="lazy"><figcaption>Abrazo de mami</figcaption></figure>
+        <figure class="foto" style="--r:1.2deg"><img src="f/0.webp" alt="" loading="lazy"><figcaption>Arriba de mami</figcaption></figure>
+        <figure class="foto" style="--r:1deg"><img src="f/48.webp" alt="" loading="lazy"><figcaption>Con los hermanos</figcaption></figure>
+        <figure class="foto" style="--r:-1.3deg"><img src="f/34.webp" alt="" loading="lazy"><figcaption>Con la abuela</figcaption></figure>
+        <figure class="foto" style="--r:-1deg"><img src="f/45.webp" alt="" loading="lazy"><figcaption>Bien cuidada</figcaption></figure>
+        <figure class="foto" style="--r:1deg"><img src="f/44.webp" alt="" loading="lazy"><figcaption>Paseo por el dique</figcaption></figure>
+        <figure class="foto ancha" style="--r:-.6deg"><img src="f/m3.webp" alt="" loading="lazy"><figcaption>Cena de las dos</figcaption></figure>
+        <figure class="foto" style="--r:1deg"><img src="f/m1.webp" alt="" loading="lazy"><figcaption>Picnic de los tres</figcaption></figure>
+        <figure class="foto ancha" style="--r:.6deg"><img src="f/24.webp" alt="" loading="lazy"><figcaption>La banda</figcaption></figure>
+      </div>
+      <button class="gato" data-g="2" style="left:18px;top:16px" aria-label="Gatito escondido"><svg><use href="#gatito"/></svg></button>
+    </div>
+  </section>
+
+  <!-- Capítulo 4 -->
+  <section class="pag" aria-label="Capítulo 4">
+    <div class="hoja">
+      <div class="cap">Capítulo cuatro</div>
+      <h2>Creciendo</h2>
+      <p class="intro">Lectora de todo, estudiosa como nadie, y con unas manos que hacen gatitos de tela que parecen de verdad.</p>
+      <div class="fotos">
+        <figure class="foto" style="--r:-1deg"><img src="f/25.webp" alt="" loading="lazy"><figcaption>Dueña del paisaje</figcaption></figure>
+        <figure class="foto" style="--r:1.2deg"><img src="f/26.webp" alt="" loading="lazy"><figcaption>Mirando para arriba</figcaption></figure>
+        <figure class="foto" style="--r:.8deg"><img src="f/23.webp" alt="" loading="lazy"><figcaption>Día de museo</figcaption></figure>
+        <figure class="foto" style="--r:-1.2deg"><img src="f/33.webp" alt="" loading="lazy"><figcaption>Noche de cine</figcaption></figure>
+        <figure class="foto" style="--r:1deg"><img src="f/28.webp" alt="" loading="lazy"><figcaption>Zona restringida (para otros)</figcaption></figure>
+        <figure class="foto" style="--r:-.8deg"><img src="f/31.webp" alt="" loading="lazy"><figcaption>Tarde de sol</figcaption></figure>
+        <figure class="foto" style="--r:1deg"><img src="f/30.webp" alt="" loading="lazy"><figcaption>Música y ruta</figcaption></figure>
+        <figure class="foto" style="--r:-1deg"><img src="f/35.webp" alt="" loading="lazy"><figcaption>Junto al agua</figcaption></figure>
+        <figure class="foto" style="--r:1.2deg"><img src="f/38.webp" alt="" loading="lazy"><figcaption>En las sierras</figcaption></figure>
+        <figure class="foto" style="--r:-1deg"><img src="f/52.webp" alt="" loading="lazy"><figcaption>Atardecer en el dique</figcaption></figure>
+        <figure class="foto" style="--r:.8deg"><img src="f/19.webp" alt="" loading="lazy"><figcaption>Cantando</figcaption></figure>
+        <figure class="foto" style="--r:-1.2deg"><img src="f/50.webp" alt="" loading="lazy"><figcaption>Lista para bailar</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Capítulo 5 -->
+  <section class="pag" aria-label="Capítulo 5">
+    <div class="hoja">
+      <div class="cap">Capítulo cinco</div>
+      <h2>Vos y yo</h2>
+      <p class="intro">Tu hermano, tu chofer y tu fan número uno.</p>
+      <div class="fotos una">
+        <figure class="foto" style="--r:-1deg"><img src="f/47.webp" alt="" loading="lazy"><figcaption>Con los brazos abiertos</figcaption></figure>
+      </div>
+      <div class="fotos">
+        <figure class="foto" style="--r:1.2deg"><img src="f/17.webp" alt="" loading="lazy"><figcaption>Dormida en mi hombro</figcaption></figure>
+        <figure class="foto" style="--r:-1deg"><img src="f/36.webp" alt="" loading="lazy"><figcaption>El mejor abrazo</figcaption></figure>
+        <figure class="foto ancha" style="--r:.6deg"><img src="f/27.webp" alt="" loading="lazy"><figcaption>Copilota oficial</figcaption></figure>
+      </div>
+      <button class="gato" data-g="3" style="right:16px;top:60px" aria-label="Gatito escondido"><svg><use href="#gatito"/></svg></button>
+    </div>
+  </section>
+
+  <!-- Capítulo 6 -->
+  <section class="pag" aria-label="Capítulo 6">
+    <div class="hoja">
+      <div class="cap">Capítulo seis</div>
+      <h2>Tomas falsas</h2>
+      <p class="intro">Todo libro serio necesita un capítulo que no lo sea.</p>
+      <div class="fotos">
+        <figure class="foto" style="--r:-1.5deg"><img src="f/22.webp" alt="" loading="lazy"><figcaption>Yo, a dieta</figcaption></figure>
+        <figure class="foto" style="--r:1.5deg"><img src="f/37.webp" alt="" loading="lazy"><figcaption>Cachetes de lujo</figcaption></figure>
+        <figure class="foto ancha" style="--r:-.6deg;max-width:70%;margin-inline:auto"><img src="f/29.webp" alt="" loading="lazy"><figcaption>¿Qué te pasó en los ojos?</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Carta -->
+  <section class="pag" aria-label="Carta">
+    <div class="hoja carta">
+      <div class="cap">Para vos</div>
+      <h2>Una carta</h2>
+      <p>Melu:</p>
+      <p>Hoy cumplís 15 y te quería hacer algo especial... no soy de escribir mucho, pero esto te lo tenía que decir.</p>
+      <p>Te vi crecer desde que eras chiquitita. Ahora leés todo, estudiás un montón, cosés, bordás, hacés esos gatitos de tela... sos una maravilla, Melu.</p>
+      <p>Mami, los chicos y yo siempre hicimos lo mejor por vos. Y lo vamos a seguir haciendo. Te parecés tanto al pa... sé que estaría re orgulloso de vos.</p>
+      <p>Para mí sos lo mejor del mundo. Te amo más que a mi vida.</p>
+      <p>Feliz cumple, sos un ángel.</p>
+      <p class="firma">Ale</p>
+    </div>
+  </section>
+
+  <!-- Logro -->
+  <section class="pag" aria-label="Final">
+    <div class="hoja logro">
+      <div id="bloqueado" class="bloq">
+        <div class="cap" style="color:var(--oro)">Última página</div>
+        <h2>Bloqueada</h2>
+        <p class="intro" style="color:var(--papel);opacity:.8">Para abrirla necesitás los 3 gatitos de tela escondidos en el libro.</p>
+        <div class="pistas" id="pistas"></div>
+        <p id="cuenta" style="opacity:.8">0 de 3 encontrados</p>
+        <button class="lnk" id="saltar">No los encuentro, abrila igual</button>
+      </div>
+      <div id="desbloqueado" class="final" hidden>
+        <div class="cap" style="color:var(--oro)">Última página</div>
+        <h2>¡Lo lograste!</h2>
+        <div class="trofeo">
+          <div class="ic">15</div>
+          <div><b>Logro desbloqueado</b><span>Quince años</span></div>
+        </div>
+        <p>Nivel nuevo, misma Melu. Que este año traiga muchos libros buenos, telas lindas y partidas ganadas.</p>
+        <figure class="foto"><img src="f/21.webp" alt="Melu con vestido blanco" loading="lazy"><figcaption>Feliz cumpleaños</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Coser el 15 -->
+  <section class="pag" aria-label="Coser el 15">
+    <div class="hoja coser">
+      <div class="cap">Un regalo más</div>
+      <h2>Cosé tu 15</h2>
+      <p class="intro" id="coserIntro">Pasá el dedo por las puntadas, desde el punto dorado, y seguí el hilo hasta terminar.</p>
+      <div class="bastidor"><canvas id="tela" aria-label="Tela para coser el número 15"></canvas></div>
+      <p class="progreso" id="progreso">0%</p>
+      <div class="mensaje" id="mensaje" hidden>
+        <p>Así como armás tus gatitos, puntada por puntada, así se va armando tu vida.</p>
+        <p>Que estos 15 sean el comienzo de todo lo lindo que viene. Yo voy a estar siempre, para lo que necesites.</p>
+        <p class="firma">Te amo, Ale</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav class="nav" aria-label="Páginas">
+  <button id="ant" aria-label="Página anterior">‹</button>
+  <div class="puntos" id="puntos"></div>
+  <button id="sig" aria-label="Página siguiente">›</button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+<canvas id="chispas"></canvas>
+
+<script>
+(function(){
+  const libro=document.getElementById('libro'),pags=[...libro.children],puntos=document.getElementById('puntos');
+  pags.forEach(()=>puntos.appendChild(document.createElement('i')));
+  const ir=i=>{i=Math.max(0,Math.min(pags.length-1,i));libro.scrollTo({left:i*libro.clientWidth,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})};
+  const actual=()=>Math.round(libro.scrollLeft/libro.clientWidth);
+  const marcar=()=>{const a=actual();[...puntos.children].forEach((p,i)=>p.classList.toggle('on',i===a));document.getElementById('ant').disabled=a===0;document.getElementById('sig').disabled=a===pags.length-1};
+  libro.addEventListener('scroll',()=>requestAnimationFrame(marcar),{passive:true});
+  document.getElementById('ant').onclick=()=>ir(actual()-1);
+  document.getElementById('sig').onclick=()=>ir(actual()+1);
+  addEventListener('keydown',e=>{if(e.key==='ArrowRight')ir(actual()+1);if(e.key==='ArrowLeft')ir(actual()-1)});
+  marcar();
+
+  // Chispas
+  const cv=document.getElementById('chispas'),cx=cv.getContext('2d');let ps=[];
+  function chispas(n){cv.width=innerWidth;cv.height=innerHeight;const cols=['#c9a24a','#c94f78','#f6ebe7','#e9a3b8'];
+    for(let i=0;i<n;i++)ps.push({x:innerWidth/2,y:innerHeight/2,vx:(Math.random()-.5)*12,vy:Math.random()*-12-3,s:Math.random()*5+3,c:cols[i%4],v:90});
+    if(ps.length===n)paso()}
+  function paso(){cx.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.v--;cx.fillStyle=p.c;cx.fillRect(p.x,p.y,p.s,p.s*1.6)});ps=ps.filter(p=>p.v>0&&p.y<cv.height+20);if(ps.length)requestAnimationFrame(paso);else cx.clearRect(0,0,cv.width,cv.height)}
+  const quieto=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.__chispas=n=>{if(!quieto)chispas(n)};
+  document.getElementById('abrir').onclick=()=>{if(!quieto)chispas(140);setTimeout(()=>ir(1),quieto?0:450)};
+
+  // Gatitos
+  const toast=document.getElementById('toast');let tt;
+  const avisar=m=>{toast.textContent=m;toast.classList.add('ver');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('ver'),2200)};
+  let hall=new Set();try{(JSON.parse(localStorage.getItem('gatos')||'[]')).forEach(g=>hall.add(g))}catch(e){}
+  const pistas=document.getElementById('pistas');
+  function pintar(){pistas.innerHTML='';for(let i=1;i<=3;i++){pistas.insertAdjacentHTML('beforeend',`<svg style="opacity:${hall.has(String(i))?1:.25}"><use href="#gatito"/></svg>`)}
+    document.getElementById('cuenta').textContent=hall.size+' de 3 encontrados';
+    document.querySelectorAll('.gato').forEach(b=>{if(hall.has(b.dataset.g))b.style.filter='drop-shadow(0 0 6px #c9a24a)'})}
+  function abrirFinal(){document.getElementById('bloqueado').hidden=true;document.getElementById('desbloqueado').hidden=false}
+  document.querySelectorAll('.gato').forEach(b=>b.onclick=()=>{
+    if(hall.has(b.dataset.g)){avisar('Este ya lo encontraste');return}
+    hall.add(b.dataset.g);try{localStorage.setItem('gatos',JSON.stringify([...hall]))}catch(e){}
+    b.classList.add('ok');pintar();
+    if(hall.size===3){avisar('¡Los 3! Andá a la última página');if(!quieto)chispas(120);abrirFinal()}else avisar(`Gatito ${hall.size} de 3`)});
+  document.getElementById('saltar').onclick=()=>{abrirFinal();if(!quieto)chispas(120)};
+  pintar();if(hall.size===3)abrirFinal();
+  addEventListener('resize',()=>marcar());
+})();
+</script>
+
+<script>
+(function(){
+  const cv=document.getElementById('tela'),cx=cv.getContext('2d');
+  const trazos=[[[30,32],[40,22],[40,80]],[[76,22],[56,22],[54,46],[62,42],[72,44],[78,52],[78,64],[72,74],[62,79],[52,76]]];
+  function muestrear(t,paso){const o=[t[0]];for(let i=1;i<t.length;i++){const[a,b]=[t[i-1],t[i]];const d=Math.hypot(b[0]-a[0],b[1]-a[1]);const n=Math.max(1,Math.round(d/paso));for(let k=1;k<=n;k++)o.push([a[0]+(b[0]-a[0])*k/n,a[1]+(b[1]-a[1])*k/n])}return o}
+  const pts=[];trazos.forEach((t,ti)=>muestrear(t,5.5).forEach((q,i)=>pts.push({x:q[0],y:q[1],t:ti,ini:i===0})));
+  let hechos=0,tam=300,dpr=1,fin=false,fase=0;
+  function medir(){const r=cv.getBoundingClientRect();if(!r.width)return;dpr=devicePixelRatio||1;tam=r.width;cv.width=tam*dpr;cv.height=tam*dpr;cx.setTransform(dpr,0,0,dpr,0,0);dibujar()}
+  const P=q=>[(q.x/100)*tam,(q.y/100)*tam];
+  function dibujar(){
+    cx.clearRect(0,0,tam,tam);cx.fillStyle='#f3dfe4';cx.fillRect(0,0,tam,tam);
+    cx.strokeStyle='rgba(201,79,120,.08)';cx.lineWidth=1;for(let i=0;i<tam;i+=4){cx.beginPath();cx.moveTo(i,0);cx.lineTo(i,tam);cx.stroke();cx.beginPath();cx.moveTo(0,i);cx.lineTo(tam,i);cx.stroke()}
+    pts.forEach((q,i)=>{if(i<hechos)return;const[x,y]=P(q);cx.fillStyle='rgba(45,35,64,.35)';cx.beginPath();cx.arc(x,y,2.2,0,7);cx.fill()});
+    cx.lineCap='round';cx.lineWidth=Math.max(4,tam/60);
+    for(let i=1;i<hechos;i++){const a=pts[i-1],b=pts[i];if(b.t!==a.t)continue;const[x1,y1]=P(a),[x2,y2]=P(b);
+      cx.strokeStyle=i%2?'#c94f78':'#e07a9c';cx.beginPath();cx.moveTo(x1+(x2-x1)*.12,y1+(y2-y1)*.12);cx.lineTo(x2-(x2-x1)*.12,y2-(y2-y1)*.12);cx.stroke()}
+    if(!fin&&hechos<pts.length){const[x,y]=P(pts[hechos]);const r=9+3*Math.sin(fase);cx.strokeStyle='#c9a24a';cx.lineWidth=3;cx.beginPath();cx.arc(x,y,r,0,7);cx.stroke();cx.fillStyle='#c9a24a';cx.beginPath();cx.arc(x,y,4,0,7);cx.fill()}
+  }
+  function animar(){fase+=.12;if(!fin)dibujar();if(!fin)requestAnimationFrame(animar)}
+  let activo=false;
+  function tocar(e){const r=cv.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;const rad=Math.max(22,tam/11);
+    let avanzo=false;while(hechos<pts.length){const[px,py]=P(pts[hechos]);if(Math.hypot(px-x,py-y)<=rad||(pts[hechos].ini&&hechos>0&&false)){hechos++;avanzo=true}else break}
+    if(avanzo){document.getElementById('progreso').textContent=Math.round(hechos/pts.length*100)+'%';if(navigator.vibrate)try{navigator.vibrate(5)}catch(_){}
+      if(hechos===pts.length)terminar()}}
+  function terminar(){fin=true;dibujar();document.getElementById('progreso').textContent='¡Cosido!';document.getElementById('coserIntro').hidden=true;document.getElementById('mensaje').hidden=false;
+    if(window.__chispas)window.__chispas(160)}
+  cv.addEventListener('pointerdown',e=>{activo=true;try{cv.setPointerCapture(e.pointerId)}catch(_){}tocar(e)});
+  cv.addEventListener('pointermove',e=>{if(activo)tocar(e)});
+  ['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,()=>activo=false));
+  // el siguiente trazo empieza solo cuando terminás el anterior: si el próximo punto es inicio de trazo, se puede tocar directo
+  addEventListener('resize',medir);new ResizeObserver(medir).observe(cv);medir();animar();
+})();
+</script>
+</body>
+</html>
